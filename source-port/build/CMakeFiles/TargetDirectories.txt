@@ -1,7 +1,0 @@
-/home/fyou/Desktop/ur-qgc-modules/openvpn-ported/source-port/build/CMakeFiles/openvpn.dir
-/home/fyou/Desktop/ur-qgc-modules/openvpn-ported/source-port/build/CMakeFiles/edit_cache.dir
-/home/fyou/Desktop/ur-qgc-modules/openvpn-ported/source-port/build/CMakeFiles/rebuild_cache.dir
-/home/fyou/Desktop/ur-qgc-modules/openvpn-ported/source-port/build/CMakeFiles/list_install_components.dir
-/home/fyou/Desktop/ur-qgc-modules/openvpn-ported/source-port/build/CMakeFiles/install.dir
-/home/fyou/Desktop/ur-qgc-modules/openvpn-ported/source-port/build/CMakeFiles/install/local.dir
-/home/fyou/Desktop/ur-qgc-modules/openvpn-ported/source-port/build/CMakeFiles/install/strip.dir
