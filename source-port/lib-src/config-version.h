@@ -1,0 +1,2 @@
+#define CONFIGURE_GIT_REVISION "master/028846f0f73db0e5"
+#define CONFIGURE_GIT_FLAGS ""

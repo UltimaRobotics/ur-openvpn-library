@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "config.h": "c"
+        "config.h": "c",
+        "manage.h": "c",
+        "socket.h": "c"
     }
 }

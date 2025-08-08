@@ -1,0 +1,6 @@
+/home/fyou/Documents/ur-openvpn-library/source-port/build/CMakeFiles/openvpn_static.dir
+/home/fyou/Documents/ur-openvpn-library/source-port/build/CMakeFiles/openvpn_shared.dir
+/home/fyou/Documents/ur-openvpn-library/source-port/build/CMakeFiles/openvpn_exe.dir
+/home/fyou/Documents/ur-openvpn-library/source-port/build/CMakeFiles/ovpn-client-api.dir
+/home/fyou/Documents/ur-openvpn-library/source-port/build/CMakeFiles/edit_cache.dir
+/home/fyou/Documents/ur-openvpn-library/source-port/build/CMakeFiles/rebuild_cache.dir

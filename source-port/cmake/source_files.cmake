@@ -1,0 +1,243 @@
+# Define source files
+set(OPENVPN_CORE_SOURCES
+    lib-src/argv.c
+    lib-src/auth_token.c
+    lib-src/base64.c
+    lib-src/buffer.c
+    lib-src/clinat.c
+    lib-src/comp-lz4.c
+    lib-src/comp.c
+    lib-src/compstub.c
+    lib-src/console.c
+    lib-src/console_builtin.c
+    lib-src/console_systemd.c
+    lib-src/crypto.c
+    lib-src/crypto_epoch.c
+    lib-src/crypto_openssl.c
+    lib-src/cryptoapi.c
+    lib-src/dco.c
+    lib-src/dco_freebsd.c
+    lib-src/dco_linux.c
+    lib-src/dco_win.c
+    lib-src/dhcp.c
+    lib-src/dns.c
+    lib-src/env_set.c
+    lib-src/error.c
+    lib-src/event.c
+    lib-src/fdmisc.c
+    lib-src/forward.c
+    lib-src/fragment.c
+    lib-src/gremlin.c
+    lib-src/helper.c
+    lib-src/httpdigest.c
+    lib-src/init.c
+    lib-src/interval.c
+    lib-src/list.c
+    lib-src/lladdr.c
+    lib-src/lzo.c
+    lib-src/manage.c
+    lib-src/mbuf.c
+    lib-src/misc.c
+    lib-src/mroute.c
+    lib-src/mss.c
+    lib-src/mstats.c
+    lib-src/mtcp.c
+    lib-src/mudp.c
+    lib-src/multi.c
+    lib-src/networking_iproute2.c
+    lib-src/networking_sitnl.c
+    lib-src/ntlm.c
+    lib-src/occ.c
+    lib-src/options.c
+    lib-src/otime.c
+    lib-src/packet_id.c
+    lib-src/perf.c
+    lib-src/ping.c
+    lib-src/pkcs11.c
+    lib-src/pkcs11_mbedtls.c
+    lib-src/pkcs11_openssl.c
+    lib-src/platform.c
+    lib-src/plugin.c
+    lib-src/pool.c
+    lib-src/proto.c
+    lib-src/proxy.c
+    lib-src/ps.c
+    lib-src/push.c
+    lib-src/reliable.c
+    lib-src/route.c
+    lib-src/run_command.c
+    lib-src/schedule.c
+    lib-src/session_id.c
+    lib-src/shaper.c
+    lib-src/sig.c
+    lib-src/socket.c
+    lib-src/socks.c
+    lib-src/ssl.c
+    lib-src/ssl_backend.h
+    lib-src/ssl_common.h
+    lib-src/ssl_mbedtls.c
+    lib-src/ssl_openssl.c
+    lib-src/ssl_pkt.c
+    lib-src/ssl_util.c
+    lib-src/ssl_verify.c
+    lib-src/ssl_verify_backend.h
+    lib-src/ssl_verify_mbedtls.c
+    lib-src/ssl_verify_openssl.c
+    lib-src/status.c
+    lib-src/tls_crypt.c
+    lib-src/tun_afunix.c
+    lib-src/reflect_filter.c
+    lib-src/vlan.c
+    lib-src/mtu.c
+    lib-src/ssl_ncp.c
+    lib-src/multi_io.c
+    lib-src/options_util.c
+    lib-src/push_util.c
+    lib-src/tun.c
+    lib-src/win32.c
+    lib-src/xkey_helper.c
+    lib-src/xkey_provider.c
+)
+
+# Compatibility sources
+set(COMPAT_SOURCES
+    lib-src/compat-basename.c
+    lib-src/compat-daemon.c
+    lib-src/compat-dirname.c
+    lib-src/compat-gettimeofday.c
+    lib-src/compat-strsep.c
+)
+
+# OpenVPN Library Headers
+set(OPENVPN_HEADERS
+    lib-src/argv.h
+    lib-src/auth_token.h
+    lib-src/base64.h
+    lib-src/basic.h
+    lib-src/buffer.h
+    lib-src/circ_list.h
+    lib-src/clinat.h
+    lib-src/common.h
+    lib-src/comp-lz4.h
+    lib-src/comp.h
+    lib-src/compat.h
+    lib-src/config.h
+    lib-src/config-version.h
+    lib-src/console.h
+    lib-src/crypto.h
+    lib-src/crypto_backend.h
+    lib-src/crypto_epoch.h
+    lib-src/crypto_mbedtls.h
+    lib-src/crypto_openssl.h
+    lib-src/cryptoapi.h
+    lib-src/dco.h
+    lib-src/dco_freebsd.h
+    lib-src/dco_internal.h
+    lib-src/dco_linux.h
+    lib-src/dco_win.h
+    lib-src/dhcp.h
+    lib-src/dns.h
+    lib-src/env_set.h
+    lib-src/errlevel.h
+    lib-src/error.h
+    lib-src/event.h
+    lib-src/fdmisc.h
+    lib-src/forward.h
+    lib-src/fragment.h
+    lib-src/gremlin.h
+    lib-src/helper.h
+    lib-src/httpdigest.h
+    lib-src/init.h
+    lib-src/integer.h
+    lib-src/interval.h
+    lib-src/list.h
+    lib-src/lladdr.h
+    lib-src/lzo.h
+    lib-src/manage.h
+    lib-src/mbedtls_compat.h
+    lib-src/mbuf.h
+    lib-src/memdbg.h
+    lib-src/misc.h
+    lib-src/mroute.h
+    lib-src/mss.h
+    lib-src/mstats.h
+    lib-src/mtcp.h
+    lib-src/mudp.h
+    lib-src/multi.h
+    lib-src/networking.h
+    lib-src/ntlm.h
+    lib-src/occ.h
+    lib-src/openvpn.h
+    lib-src/options.h
+    lib-src/otime.h
+    lib-src/packet_id.h
+    lib-src/perf.h
+    lib-src/pf.h
+    lib-src/ping.h
+    lib-src/pkcs11.h
+    lib-src/pkcs11_backend.h
+    lib-src/platform.h
+    lib-src/plugin.h
+    lib-src/pool.h
+    lib-src/proto.h
+    lib-src/proxy.h
+    lib-src/ps.h
+    lib-src/push.h
+    lib-src/pushlist.h
+    lib-src/reliable.h
+    lib-src/route.h
+    lib-src/run_command.h
+    lib-src/schedule.h
+    lib-src/session_id.h
+    lib-src/shaper.h
+    lib-src/sig.h
+    lib-src/socket.h
+    lib-src/socks.h
+    lib-src/ssl.h
+    lib-src/ssl_backend.h
+    lib-src/ssl_common.h
+    lib-src/ssl_mbedtls.h
+    lib-src/ssl_openssl.h
+    lib-src/ssl_pkt.h
+    lib-src/ssl_util.h
+    lib-src/ssl_verify.h
+    lib-src/ssl_verify_backend.h
+    lib-src/status.h
+    lib-src/syshead.h
+    lib-src/tls_crypt.h
+    lib-src/tun.h
+    lib-src/win32.h
+    lib-src/xkey_common.h
+    lib-src/xkey_helper.h
+    lib-src/xkey_provider.h
+)
+
+# Add Windows-specific sources
+if(WIN32_PLATFORM)
+    list(APPEND OPENVPN_CORE_SOURCES
+        lib-src/openvpn_win32_resources.rc
+        lib-src/wfp_block.c lib-src/wfp_block.h
+    )
+endif()
+
+# API source files
+set(CLIENT_API_SOURCES 
+    apis/cJSON.c
+    apis/example_client_usage.c
+    apis/openvpn_client_api.c    
+)
+
+set(SERVER_API_SOURCES 
+    apis/cJSON.c
+    apis/example_server_usage.c
+    apis/openvpn_server_api.c    
+)
+
+# Set source directory for sources
+foreach(source ${OPENVPN_CORE_SOURCES})
+    if(EXISTS "${CMAKE_SOURCE_DIR}/src/openvpn/${source}")
+        set_source_files_properties(${source} PROPERTIES
+            LOCATION "${CMAKE_SOURCE_DIR}/src/openvpn/${source}")
+    endif()
+endforeach()
+

@@ -1,0 +1,370 @@
+
+cmake_minimum_required(VERSION 3.10)
+project(openvpn VERSION 2.7.0 LANGUAGES C)
+
+# Set C standard
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+# Build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Compiler flags
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wold-style-definition -Wstrict-prototypes -Wno-stringop-truncation")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+set(CMAKE_C_FLAGS_RELEASE "-g -O2")
+
+# Platform detection
+if(WIN32)
+    set(WIN32_PLATFORM ON)
+    add_definitions(-DUNICODE)
+else()
+    set(WIN32_PLATFORM OFF)
+endif()
+
+# Include directories
+include_directories(
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/src/compat
+    ${CMAKE_BINARY_DIR}
+    ${CMAKE_BINARY_DIR}/include
+    ${CMAKE_SOURCE_DIR}
+)
+
+# Find required packages
+find_package(PkgConfig REQUIRED)
+
+# OpenSSL
+find_package(OpenSSL REQUIRED)
+if(OPENSSL_FOUND)
+    set(OPTIONAL_CRYPTO_LIBS ${OPENSSL_LIBRARIES})
+    set(OPTIONAL_CRYPTO_CFLAGS ${OPENSSL_INCLUDE_DIR})
+    include_directories(${OPENSSL_INCLUDE_DIR})
+endif()
+
+# libcap-ng
+pkg_check_modules(LIBCAPNG libcap-ng)
+if(LIBCAPNG_FOUND)
+    set(OPTIONAL_LIBCAPNG_LIBS ${LIBCAPNG_LIBRARIES})
+    set(OPTIONAL_LIBCAPNG_CFLAGS ${LIBCAPNG_CFLAGS})
+endif()
+
+# libnl (for Linux) - Check for both libnl-3.0 and libnl-genl-3.0
+if(NOT WIN32)
+    pkg_check_modules(LIBNL libnl-3.0>=3.4.0)
+    pkg_check_modules(LIBNL_GENL libnl-genl-3.0>=3.4.0)
+    if(LIBNL_FOUND AND LIBNL_GENL_FOUND)
+        set(OPTIONAL_LIBNL_GENL_LIBS ${LIBNL_LIBRARIES} ${LIBNL_GENL_LIBRARIES})
+        set(OPTIONAL_LIBNL_GENL_CFLAGS ${LIBNL_CFLAGS_OTHER} ${LIBNL_GENL_CFLAGS_OTHER})
+        include_directories(${LIBNL_INCLUDE_DIRS} ${LIBNL_GENL_INCLUDE_DIRS})
+        link_directories(${LIBNL_LIBRARY_DIRS} ${LIBNL_GENL_LIBRARY_DIRS})
+        add_definitions(-DENABLE_DCO=1)
+    else()
+        message(WARNING "libnl libraries not found - DCO support will be disabled")
+        add_definitions(-DENABLE_DCO=0)
+    endif()
+else()
+    add_definitions(-DENABLE_DCO=0)
+endif()
+
+# LZO compression
+pkg_check_modules(LZO lzo2)
+if(LZO_FOUND)
+    set(OPTIONAL_LZO_LIBS ${LZO_LIBRARIES})
+    set(OPTIONAL_LZO_CFLAGS ${LZO_CFLAGS})
+    include_directories(${LZO_INCLUDE_DIRS})
+endif()
+
+# LZ4 compression
+pkg_check_modules(LZ4 liblz4)
+if(LZ4_FOUND)
+    set(OPTIONAL_LZ4_LIBS ${LZ4_LIBRARIES})
+    set(OPTIONAL_LZ4_CFLAGS ${LZ4_CFLAGS})
+    include_directories(${LZ4_INCLUDE_DIRS})
+endif()
+
+# PAM
+pkg_check_modules(LIBPAM libpam)
+if(LIBPAM_FOUND)
+    set(OPTIONAL_PAM_LIBS ${LIBPAM_LIBRARIES})
+endif()
+
+# Socket libraries (for some systems)
+if(NOT WIN32)
+    find_library(NSL_LIB nsl)
+    find_library(RESOLV_LIB resolv)
+    set(SOCKETS_LIBS "")
+    if(NSL_LIB)
+        list(APPEND SOCKETS_LIBS ${NSL_LIB})
+    endif()
+    if(RESOLV_LIB)
+        list(APPEND SOCKETS_LIBS ${RESOLV_LIB})
+    endif()
+endif()
+
+# DL library
+find_library(DL_LIB dl)
+if(DL_LIB)
+    set(OPTIONAL_DL_LIBS ${DL_LIB})
+endif()
+
+# Define source files
+set(OPENVPN_SOURCES
+    argv.c argv.h
+    auth_token.c auth_token.h
+    base64.c base64.h
+    basic.h
+    buffer.c buffer.h
+    circ_list.h
+    clinat.c clinat.h
+    common.h
+    comp.c comp.h compstub.c
+    comp-lz4.c comp-lz4.h
+    crypto.c crypto.h crypto_backend.h
+    crypto_openssl.c crypto_openssl.h
+    crypto_mbedtls.c crypto_mbedtls.h
+    crypto_epoch.c crypto_epoch.h
+    dco.c dco.h dco_internal.h
+    dco_freebsd.c dco_freebsd.h
+    dco_linux.c dco_linux.h
+    dco_win.c dco_win.h
+    dhcp.c dhcp.h
+    dns.c dns.h
+    env_set.c env_set.h
+    errlevel.h
+    error.c error.h
+    event.c event.h
+    fdmisc.c fdmisc.h
+    forward.c forward.h
+    fragment.c fragment.h
+    gremlin.c gremlin.h
+    helper.c helper.h
+    httpdigest.c httpdigest.h
+    lladdr.c lladdr.h
+    init.c init.h
+    integer.h
+    interval.c interval.h
+    list.c list.h
+    lzo.c lzo.h
+    manage.c manage.h
+    mbuf.c mbuf.h
+    memdbg.h
+    misc.c misc.h
+    ovpn_dco_freebsd.h
+    ovpn_dco_linux.h
+    ovpn_dco_win.h
+    platform.c platform.h
+    console.c console.h console_builtin.c console_systemd.c
+    mbedtls_compat.h
+    mroute.c mroute.h
+    mss.c mss.h
+    mstats.c mstats.h
+    mtcp.c mtcp.h
+    mtu.c mtu.h
+    mudp.c mudp.h
+    multi.c multi.h
+    multi_io.c multi_io.h
+    networking_freebsd.c
+    networking_iproute2.c networking_iproute2.h
+    networking_sitnl.c networking_sitnl.h
+    networking.h
+    ntlm.c ntlm.h
+    occ.c occ.h
+    openssl_compat.h
+    pkcs11.c pkcs11.h pkcs11_backend.h
+    pkcs11_openssl.c
+    pkcs11_mbedtls.c
+    openvpn.h
+    options.c options.h
+    options_util.c options_util.h
+    otime.c otime.h
+    packet_id.c packet_id.h
+    perf.c perf.h
+    ping.c ping.h
+    plugin.c plugin.h
+    pool.c pool.h
+    proto.c proto.h
+    proxy.c proxy.h
+    ps.c ps.h
+    push.c push_util.c push.h
+    pushlist.h
+    reflect_filter.c reflect_filter.h
+    reliable.c reliable.h
+    route.c route.h
+    run_command.c run_command.h
+    schedule.c schedule.h
+    session_id.c session_id.h
+    shaper.c shaper.h
+    sig.c sig.h
+    socket.c socket.h
+    socks.c socks.h
+    ssl.c ssl.h ssl_backend.h
+    ssl_openssl.c ssl_openssl.h
+    ssl_mbedtls.c ssl_mbedtls.h
+    ssl_ncp.c ssl_ncp.h
+    ssl_pkt.c ssl_pkt.h
+    ssl_util.c ssl_util.h
+    ssl_common.h
+    ssl_verify.c ssl_verify.h ssl_verify_backend.h
+    ssl_verify_openssl.c ssl_verify_openssl.h
+    ssl_verify_mbedtls.c ssl_verify_mbedtls.h
+    status.c status.h
+    syshead.h
+    tls_crypt.c tls_crypt.h
+    tun.c tun.h
+    tun_afunix.c tun_afunix.h
+    vlan.c vlan.h
+    xkey_provider.c xkey_common.h
+    xkey_helper.c
+    win32.h win32.c
+    win32-util.h win32-util.c
+    cryptoapi.h cryptoapi.c
+)
+
+# Add Windows-specific sources
+if(WIN32_PLATFORM)
+    list(APPEND OPENVPN_SOURCES
+        openvpn_win32_resources.rc
+        wfp_block.c wfp_block.h
+    )
+endif()
+
+add_library(ovpn-source-lib STATIC ${OPENVPN_SOURCES})
+target_link_libraries(ovpn-source-lib
+    ${OPTIONAL_CRYPTO_LIBS}
+    ${OPTIONAL_LIBCAPNG_LIBS}
+    ${OPTIONAL_LIBNL_GENL_LIBS}
+    ${OPTIONAL_LZO_LIBS}
+    ${OPTIONAL_LZ4_LIBS}
+    ${OPTIONAL_DL_LIBS}
+    ${SOCKETS_LIBS}
+)
+
+set(CLIENT_API_SOURCES 
+    apis/cJSON.c
+    apis/example_client_usage.c
+    apis/openvpn_client_api.c    
+)
+set(SERVER_API_SOURCES 
+    apis/cJSON.c
+    apis/example_server_usage.c
+    apis/openvpn_server_api.c    
+)
+
+# Create the executable
+add_executable(openvpn openvpn.c )
+# Compile definitions
+target_compile_definitions(openvpn PRIVATE
+    -DHAVE_CONFIG_H
+    -DPLUGIN_LIBDIR="${CMAKE_INSTALL_PREFIX}/lib/openvpn/plugins"
+    -DDEFAULT_DNS_UPDOWN="${CMAKE_INSTALL_PREFIX}/libexec/openvpn/dns-updown"
+)
+# Link libraries
+target_link_libraries(openvpn
+    ovpn-source-lib
+    ${OPTIONAL_CRYPTO_LIBS}
+    ${OPTIONAL_LIBCAPNG_LIBS}
+    ${OPTIONAL_LIBNL_GENL_LIBS}
+    ${OPTIONAL_LZO_LIBS}
+    ${OPTIONAL_LZ4_LIBS}
+    ${OPTIONAL_DL_LIBS}
+    ${SOCKETS_LIBS}
+)
+add_executable(ovpn-client-api ${CLIENT_API_SOURCES} )
+target_include_directories(ovpn-client-api PRIVATE
+    ${CMAKE_SOURCE_DIR}/apis
+)
+# Link libraries
+target_link_libraries(ovpn-client-api
+    ovpn-source-lib
+    ${OPTIONAL_CRYPTO_LIBS}
+    ${OPTIONAL_LIBCAPNG_LIBS}
+    ${OPTIONAL_LIBNL_GENL_LIBS}
+    ${OPTIONAL_LZO_LIBS}
+    ${OPTIONAL_LZ4_LIBS}
+    ${OPTIONAL_DL_LIBS}
+    ${SOCKETS_LIBS}
+)
+add_executable(ovpn-server-api ${SERVER_API_SOURCES} )
+target_include_directories(ovpn-server-api PRIVATE
+    ${CMAKE_SOURCE_DIR}/apis
+)
+# Link libraries
+target_link_libraries(ovpn-server-api
+    ovpn-source-lib
+    ${OPTIONAL_CRYPTO_LIBS}
+    ${OPTIONAL_LIBCAPNG_LIBS}
+    ${OPTIONAL_LIBNL_GENL_LIBS}
+    ${OPTIONAL_LZO_LIBS}
+    ${OPTIONAL_LZ4_LIBS}
+    ${OPTIONAL_DL_LIBS}
+    ${SOCKETS_LIBS}
+)
+# Set source directory for sources
+foreach(source ${OPENVPN_SOURCES})
+    if(EXISTS "${CMAKE_SOURCE_DIR}/src/openvpn/${source}")
+        set_source_files_properties(${source} PROPERTIES
+            LOCATION "${CMAKE_SOURCE_DIR}/src/openvpn/${source}")
+    endif()
+endforeach()
+
+
+# Windows-specific definitions
+if(WIN32_PLATFORM)
+    target_compile_definitions(openvpn PRIVATE
+        -municode -UUNICODE
+    )
+endif()
+
+
+
+# Windows-specific libraries
+if(WIN32_PLATFORM)
+    target_link_libraries(openvpn
+        gdi32 ws2_32 wininet crypt32 iphlpapi winmm
+        fwpuclnt rpcrt4 ncrypt setupapi bcrypt
+    )
+endif()
+
+# Installation
+install(TARGETS openvpn
+    RUNTIME DESTINATION sbin
+)
+
+# Optional: Create a compatibility library (libcompat)
+# This would need to be implemented based on src/compat contents
+# add_subdirectory(src/compat)
+# target_link_libraries(openvpn compat)
+
+# Print configuration summary
+message(STATUS "OpenVPN Configuration Summary:")
+message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "  C Compiler: ${CMAKE_C_COMPILER}")
+message(STATUS "  OpenSSL: ${OPENSSL_FOUND}")
+if(LIBCAPNG_FOUND)
+    message(STATUS "  libcap-ng: YES")
+else()
+    message(STATUS "  libcap-ng: NO")
+endif()
+if(LIBNL_FOUND AND LIBNL_GENL_FOUND)
+    message(STATUS "  libnl: YES")
+    message(STATUS "  libnl-genl: YES")
+    message(STATUS "  DCO support: YES")
+else()
+    message(STATUS "  libnl: NO")
+    message(STATUS "  libnl-genl: NO")
+    message(STATUS "  DCO support: NO")
+endif()
+if(LZO_FOUND)
+    message(STATUS "  LZO compression: YES")
+else()
+    message(STATUS "  LZO compression: NO")
+endif()
+if(LZ4_FOUND)
+    message(STATUS "  LZ4 compression: YES")
+else()
+    message(STATUS "  LZ4 compression: NO")
+endif()
+

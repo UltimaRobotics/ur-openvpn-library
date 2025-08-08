@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wold-style-definition -Wstrict-prototypes -Wno-stringop-truncation -g -O2 CMakeFiles/openvpn_exe.dir/lib-src/openvpn.c.o -o openvpn-bin  libopenvpn.a /usr/lib/x86_64-linux-gnu/libssl.a /usr/lib/x86_64-linux-gnu/libcrypto.a -ldl -llzo2 -llz4 -lnl-3 -ldl -llzo2 -llz4 -lnl-3 -lpthread 
